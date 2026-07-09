@@ -17,7 +17,7 @@ function App() {
       .catch((error) => {
         console.error("Error al obtener tareas:", error);
       });
-  }, [apiUrl]);
+  }, [apiUrl];
 
   // Crear tarea
   const addTaskToList = (title) => {
