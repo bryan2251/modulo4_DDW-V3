@@ -8,11 +8,17 @@ export const getTasks = async (req: any, res: any) => {
 export const createTask = async (req: any, res: any) => {
   const { title } = req.body;
 
+  if (!title || !title.trim()) {
+        return res.status(400).json({
+            error: "El título es obligatorio"
+        });
+  }
+
   const newTask = await prisma.task.create({
     data: { title },
   });
 
-  res.json(newTask);
+  res.status(201).json(newTask);
 };
 
 export const deleteTask = async (req: any, res: any) => {
