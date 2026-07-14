@@ -1,25 +1,20 @@
-import { test, expect } from '@playwright/test'
- 
+import { test, expect } from '@playwright/test';
+
 test('un usuario puede crear una tarea y verla en la lista', async ({ page }) => {
-  // Imprimir en la consola de CI cualquier fallo de red de la API
-  page.on('response', response => {
-    if (response.url().includes('/tasks')) {
-      console.log(`[API RESPONSE] Status: ${response.status()} URL: ${response.url()}`);
-    }
-  });
+  // 1. NAVEGAR A LA PÁGINA (Si falta esto, Playwright está en "about:blank")
+  await page.goto('/');
 
-  // ... tus pasos anteriores de navegación e input ...
+  // 2. Esperar e interactuar con el input
+  const input = page.getByPlaceholder('Escribe una nueva tarea');
+  await expect(input).toBeVisible(); // Asegura que el DOM ya cargó
+  await input.fill('Comprar pan');
 
-  await page.getByPlaceholder('Escribe una nueva tarea').fill('Comprar pan');
-
-  // Relajamos temporalmente el status === 201 a solo verificar la URL
-  const [response] = await Promise.all([
+  // 3. Guardar la tarea
+  await Promise.all([
     page.waitForResponse(res => res.url().includes('/tasks')),
     page.getByRole('button', { name: 'Agregar Tarea' }).click()
   ]);
 
-  console.log('Código HTTP devuelto:', response.status());
-
-  // 3. Verla en la lista
+  // 4. Verificar en la lista
   await expect(page.getByText('Comprar pan')).toBeVisible();
 });
