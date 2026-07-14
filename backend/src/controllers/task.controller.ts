@@ -5,7 +5,7 @@ export const getTasks = async (req: Request, res: Response) => {
   try {
     const tasks = await prisma.task.findMany();
     res.json(tasks);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Error al obtener las tareas" });
   }
 };
@@ -25,13 +25,12 @@ export const createTask = async (req: Request, res: Response) => {
     });
 
     res.status(201).json(newTask);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Error al crear la tarea" });
   }
 };
 
 export const deleteTask = async (req: Request, res: Response) => {
-  // Se fuerza la conversión a String() para garantizar un valor 'string' válido
   const id = parseInt(String(req.params.id), 10);
 
   if (isNaN(id)) {
@@ -44,13 +43,12 @@ export const deleteTask = async (req: Request, res: Response) => {
     });
 
     res.json({ message: "Task deleted" });
-  } catch (error) {
+  } catch {
     res.status(404).json({ error: "Tarea no encontrada o error al eliminar" });
   }
 };
 
 export const toggleTask = async (req: Request, res: Response) => {
-  // Se fuerza la conversión a String() para evitar el error TS2345
   const id = parseInt(String(req.params.id), 10);
 
   if (isNaN(id)) {
@@ -74,7 +72,7 @@ export const toggleTask = async (req: Request, res: Response) => {
     });
 
     res.json(updated);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Error al actualizar la tarea" });
   }
 };
