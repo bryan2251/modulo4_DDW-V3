@@ -23,6 +23,7 @@ function TaskInputs({ onAddTask }: TaskInputProp) {
     <div className="input-container">
       <input 
         type="text" 
+        name='Nueva Tarea'
         placeholder={error ? "" : "Escribe una nueva tarea"}
         value={inputValue}
         className={error ? "input-error" : ""}
