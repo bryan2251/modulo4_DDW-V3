@@ -13,13 +13,16 @@ export default defineConfig({
     },
   ],
   
-  /* Configuración para levantar Backend y Frontend simultáneamente */
   webServer: [
     {
       command: 'cd ../backend && npm run dev', 
       url: 'http://localhost:3000/tasks', 
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
+      env: {
+        PORT: '3000',
+        DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:C0NTR4S3N4@localhost:5432/taskmanager'
+      }
     },
     {
       command: 'npm run dev',
