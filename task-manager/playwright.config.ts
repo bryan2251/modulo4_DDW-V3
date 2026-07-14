@@ -25,10 +25,16 @@ export default defineConfig({
       }
     },
     {
+      // 2. Servidor Frontend
       command: 'npm run dev',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
+      env: {
+        // Reemplaza 'VITE_API_URL' por el nombre exacto que uses en tu frontend
+        // para apuntar a la base del backend
+        VITE_API_URL: 'http://localhost:3000' 
+      }
     },
   ],
 });
