@@ -1,23 +1,24 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './e2e',
-  use: {
-    baseURL: 'http://localhost:5173',
-  },
-
-  /* Configure projects for major browsers */
-  projects: [
+  // ... tu configuración actual ...
+  webServer: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      command: 'npm run dev',
+      cwd: '../backend',
+      url: 'http://localhost:3000', // Reemplaza por el puerto donde escucha tu backend
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
     },
+    {
+      command: 'npm run dev', // O 'npm run preview' si compilas el frontend
+      cwd: '.',
+      url: 'http://localhost:5173', // Reemplaza por la URL de tu frontend (e.g. Vite/Next/React)
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    }
   ],
-  
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
+  use: {
+    baseURL: 'http://localhost:5173', // La URL base que usa tu test
   },
-
 });

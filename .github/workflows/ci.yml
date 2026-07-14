@@ -55,25 +55,6 @@ jobs:
     name: Pruebas unitarias
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: C0NTR4S3N4
-          POSTGRES_DB: taskmanager
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    env:
-      DATABASE_URL: postgresql://postgres:C0NTR4S3N4@localhost:5432/taskmanager
-
-
     steps:
       - uses: actions/checkout@v4
 
@@ -107,7 +88,7 @@ jobs:
         working-directory: task-manager
         run: npm ci
 
-      - name: Ejecutar pruebas unitarias
+      - name: Ejecutar pruebas E2E
         working-directory: task-manager
         run: npx vitest run --coverage
 
@@ -144,7 +125,7 @@ jobs:
             backend/package-lock.json
             task-manager/package-lock.json
 
-      # Backend
+      # Backend Setup
       - name: Instalar backend
         working-directory: backend
         run: npm ci
@@ -153,20 +134,16 @@ jobs:
         working-directory: backend
         run: npx prisma generate
 
-      - name: Crear tablas
+      - name: Crear tablas en Postgres
         working-directory: backend
         run: npx prisma db push
 
-      - name: Iniciar backend
-        working-directory: backend
-        run: npm run dev &
-
-      # Frontend
+      # Frontend & Playwright Setup
       - name: Instalar frontend
         working-directory: task-manager
         run: npm ci
 
-      - name: Instalar Playwright
+      - name: Instalar navegadores de Playwright
         working-directory: task-manager
         run: npx playwright install --with-deps chromium
 
