@@ -2,7 +2,7 @@
  
 selector de tareas
  
-<!-- BADGE_CI -->
+[![CI](https://github.com/bryan2251/modulo4_DDW-V3/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/bryan2251/modulo4_DDW-V3/actions/workflows/ci.yml)
  
 ## 🚀 Instalación local
  

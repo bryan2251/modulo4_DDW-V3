@@ -1,25 +1,177 @@
 name: CI
- 
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
- 
+
 jobs:
   backend:
-    name: Lint & Build
+    name: Backend - Lint & Build
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+
+      # Solo si existen estos scripts
+      - run: npm run lint
+      - run: npm run build
+
+  frontend:
+    name: Frontend - Lint & Build
+    runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: ./task-manager
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: 24
+          cache: npm
           cache-dependency-path: task-manager/package-lock.json
+
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+
+  pruebas:
+    name: Pruebas unitarias
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: C0NTR4S3N4
+          POSTGRES_DB: taskmanager
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://postgres:C0NTR4S3N4@localhost:5432/taskmanager
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            task-manager/package-lock.json
+
+      # Backend
+      - name: Instalar backend
+        working-directory: backend
+        run: npm ci
+
+      - name: Generar cliente Prisma
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Crear tablas
+        working-directory: backend
+        run: npx prisma db push
+
+      - name: Iniciar backend
+        working-directory: backend
+        run: npm run dev &
+
+      # Frontend
+      - name: Instalar frontend
+        working-directory: task-manager
+        run: npm ci
+
+      - name: Ejecutar pruebas unitarias
+        working-directory: task-manager
+        run: npx vitest run --coverage
+
+  e2e:
+    name: Pruebas E2E
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: C0NTR4S3N4
+          POSTGRES_DB: taskmanager
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://postgres:C0NTR4S3N4@localhost:5432/taskmanager
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            task-manager/package-lock.json
+
+      # 1. Instalar dependencias de ambos proyectos
+      - name: Instalar dependencias del Backend
+        working-directory: backend
+        run: npm ci
+
+      - name: Instalar dependencias del Frontend
+        working-directory: task-manager
+        run: npm ci
+
+      # 2. Preparar Base de Datos
+      - name: Configurar Base de Datos (Prisma)
+        working-directory: backend
+        run: |
+          npx prisma generate
+          npx prisma db push
+
+      # 3. Playwright & Tests
+      - name: Instalar navegadores de Playwright
+        working-directory: task-manager
+        run: npx playwright install --with-deps chromium
+
+      - name: Ejecutar pruebas E2E
+        working-directory: task-manager
+        run: npx playwright test
+        # Agrega esto al final de tu job e2e en el YAML:
+      - name: Subir reporte de Playwright si falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: task-manager/test-results/
+          retention-days: 7
