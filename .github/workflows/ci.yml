@@ -54,7 +54,7 @@ jobs:
   pruebas:
     name: Pruebas unitarias
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:16
@@ -106,7 +106,7 @@ jobs:
         working-directory: task-manager
         run: npm ci
 
-      - name: Ejecutar pruebas E2E
+      - name: Ejecutar pruebas unitarias
         working-directory: task-manager
         run: npx vitest run --coverage
 
