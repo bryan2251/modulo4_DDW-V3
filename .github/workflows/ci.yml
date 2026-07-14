@@ -54,6 +54,24 @@ jobs:
   pruebas:
     name: Pruebas unitarias
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: C0NTR4S3N4
+          POSTGRES_DB: taskmanager
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://postgres:C0NTR4S3N4@localhost:5432/taskmanager
 
     steps:
       - uses: actions/checkout@v4
