@@ -7,15 +7,17 @@ test('un usuario puede crear una tarea y verla en la lista', async ({ page }) =>
   await expect(input).toBeVisible();
   await input.fill('Comprar pan');
 
-  // Assert that the creation request completes successfully (HTTP 2xx)
-  const [response] = await Promise.all([
-    page.waitForResponse(res => res.url().includes('/tasks') && res.ok()),
-    page.getByRole('button', { name: 'Agregar Tarea' }).click(),
-  ]);
+  // ✅ Captura la promesa SIN filtrar por res.ok()
+  const responsePromise = page.waitForResponse(res => res.url().includes('/tasks') && res.request().method() === 'POST');
+  
+  await page.getByRole('button', { name: 'Agregar Tarea' }).click();
+  
+  // ✅ Espera la respuesta y evalúa el estado inmediatamente
+  const response = await responsePromise;
+  
+  // Esto fallará rápido en CI y te dirá si fue un 500, 404, etc.
+  expect(response.ok(), `El API falló con estado: ${response.status()}`).toBeTruthy();
 
-  // Ensure the input field was cleared (confirms state update triggered)
   await expect(input).toHaveValue('');
-
-  // Assert item presence in UI
   await expect(page.getByText('Comprar pan')).toBeVisible();
 });
