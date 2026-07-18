@@ -175,6 +175,7 @@ jobs:
           name: playwright-report
           path: task-manager/test-results/
           retention-days: 7
+
   migraciones:
     name: Migraciones y Seeds
     runs-on: ubuntu-latest
@@ -209,3 +210,4 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
       - run: npx prisma migrate deploy
+      - run: npx prisma db seed
