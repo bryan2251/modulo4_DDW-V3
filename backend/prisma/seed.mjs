@@ -1,0 +1,27 @@
+import "dotenv/config"
+import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+const prisma = new PrismaClient({ adapter })
+
+async function main() {
+  await prisma.task.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      title: 'Tarea de ejemplo para pruebas',
+      completed: false,
+    },
+  })
+}
+
+main()
+  .then(() => prisma.$disconnect())
+  .catch(async (e) => {
+    console.error(e)
+    await prisma.$disconnect()
+    // eslint-disable-next-line no-undef
+    process.exit(1)
+  })
