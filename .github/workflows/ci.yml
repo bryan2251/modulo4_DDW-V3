@@ -213,15 +213,15 @@ jobs:
       - run: npx prisma db seed
 
   deploy-staging:
-      name: Deploy a Staging
-      needs: [frontend, backend, pruebas, e2e, migraciones]
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - name: Instalar Railway CLI
-          run: npm install -g @railway/cli
-        - name: Desplegar a Railway (staging)
-          run: railway up --service backend --environment staging
-          env:
-            RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    name: Deploy a Staging
+    needs: [frontend, backend, pruebas, e2e, migraciones]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar Railway CLI
+        run: npm install -g @railway/cli
+      - name: Desplegar a Railway (staging)
+        run: railway up --service backend --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment staging --ci
+        env:
+          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
