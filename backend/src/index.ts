@@ -12,6 +12,9 @@ app.use(express.json());
 
 // rutas
 app.use("/tasks", taskRoutes);
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' })
+})
 
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
