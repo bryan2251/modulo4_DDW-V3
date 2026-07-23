@@ -1,22 +1,18 @@
+# --- ETAPA 1: BUILDER ---
 FROM node:24-alpine AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-# Copiamos la carpeta de prisma para que el schema.prisma esté accesible
 COPY prisma ./prisma/
 
-# Instalamos todas las dependencias
 RUN npm ci
-
-# Generamos el cliente de Prisma (crea node_modules/.prisma)
 RUN npx prisma generate
 
 COPY . .
-# Compilamos TypeScript a JavaScript
 RUN npm run build
 
-# --- ETAPA FINAL DE PRODUCCIÓN ---
+# --- ETAPA 2: PRODUCCIÓN ---
 FROM node:24-alpine
 
 WORKDIR /app
@@ -27,15 +23,19 @@ COPY prisma ./prisma/
 # Instalamos dependencias de producción
 RUN npm ci --omit=dev
 
-# Copiamos el Prisma Client generado desde la etapa de compilación
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+# Copiamos la build de TypeScript y el Prisma Client generado
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/prisma.config.ts ./
+
+# Copiamos y damos permisos al script de entrada
 COPY docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
+RUN sed -i 's/\r$//' docker-entrypoint.sh && chmod +x docker-entrypoint.sh
 
 EXPOSE 3000
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 
+# Pasamos el comando por defecto al entrypoint
 CMD ["node", "dist/server.js"]

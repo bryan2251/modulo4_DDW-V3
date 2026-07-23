@@ -5,6 +5,6 @@ const PORT = 3000;
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', uptime: process.uptime() || 0 });
 });
-app.listen(PORT, () => {
-  console.log(`I live, Backend running on http://localhost:${PORT}`);
+app.listen(Number(PORT), '0.0.0.0', () => {
+  console.log(`Backend escuchando en http://0.0.0.0:${PORT}`);
 });
