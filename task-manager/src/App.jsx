@@ -39,7 +39,7 @@ function App() {
 
   //Eliminar tarea
   const deleteTask = (id) => {
-    fetch(` ${apiUrl}/tasks/${id}`, {
+    fetch(`${apiUrl}/tasks/${id}`, {
       method: "DELETE",
     })
       .then(() => {
@@ -52,7 +52,7 @@ function App() {
 
   // Toggle completed
   const toggleTask = (id) => {
-    fetch(` ${apiUrl}/tasks/${id}`, {
+    fetch(`${apiUrl}/tasks/${id}`, {
       method: "PUT",
     })
       .then(() => {
